@@ -1,19 +1,15 @@
 pipeline {
     agent any
-
     environment {
         AZURE_CREDENTIALS_ID = 'azure-service-principal'
         RESOURCE_GROUP = 'rg-jenkins'
         APP_SERVICE_NAME = 'rudramjenkins84758'
-        AZURE_CLIENT_ID = credentials('AZURE_CLIENT_ID')
-        AZURE_CLIENT_SECRET = credentials('AZURE_CLIENT_SECRET')
-        AZURE_TENANT_ID = credentials('AZURE_TENANT_ID')
     }
 
     stages {
         stage('Checkout Code') {
             steps {
-                git branch: 'master', credentialsId: 'github-credentials', url: 'https://github.com/mishra-rd015/WebApplication1.git'
+                git branch: 'master', url: 'https://github.com/mishra-rd015/WebApplication1.git'
             }
         }
 
@@ -28,9 +24,9 @@ pipeline {
         stage('Deploy') {
             steps {
                 withCredentials([azureServicePrincipal(credentialsId: AZURE_CREDENTIALS_ID)]) {
-                    bat "az login --service-principal -u ${env.AZURE_CLIENT_ID} -p ${env.AZURE_CLIENT_SECRET} --tenant ${env.AZURE_TENANT_ID}"
-                    powershell 'Compress-Archive -Path ./publish/* -DestinationPath ./publish.zip -Force'
-                    bat "az webapp deploy --resource-group ${env.RESOURCE_GROUP} --name ${env.APP_SERVICE_NAME} --src-path ./publish.zip --type zip"
+                    bat "az login --service-principal -u $AZURE_CLIENT_ID -p $AZURE_CLIENT_SECRET --tenant $AZURE_TENANT_ID"
+                    bat "powershell Compress-Archive -Path ./publish/* -DestinationPath ./publish.zip -Force"
+                    bat "az webapp deploy --resource-group $RESOURCE_GROUP --name $APP_SERVICE_NAME --src-path ./publish.zip --type zip"
                 }
             }
         }
