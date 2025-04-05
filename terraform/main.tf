@@ -1,10 +1,24 @@
+terraform {
+  required_providers {
+    azurerm = {
+      source  = "hashicorp/azurerm"
+      version = "~> 4.0"
+    }
+  }
+
+  backend "azurerm" {
+    resource_group_name  = "rg-jenkins"
+    storage_account_name = "flasktfstorage"
+    container_name       = "tfstate"
+    key                  = "terraform.tfstate"
+  }
+
+  required_version = ">= 1.1.0"
+}
+
 provider "azurerm" {
   features {}
-
   subscription_id = "4947feb5-b5f6-4284-acce-df1b262aedb0"
-  client_id       = "16a790e6-0069-4397-af16-1c0f0ca9a9bf"
-  client_secret   = "cXo8Q~wv3nv3g5WUCddUyxIoA0Hvh64OOVMabaJ6"
-  tenant_id       = "2ab9811e-8172-4cd1-bf22-858c28b732da"
 }
 
 resource "azurerm_resource_group" "this" {
@@ -27,10 +41,22 @@ resource "azurerm_windows_web_app" "this" {
   service_plan_id     = azurerm_service_plan.this.id
 
   site_config {
-    always_on = true
+    always_on               = true
+    managed_pipeline_mode   = "Integrated"
+    scm_type                = "LocalGit"
+    ftps_state              = "Disabled"
+    use_32_bit_worker       = true
+    websockets_enabled      = false
+    http2_enabled           = false
+    ip_restriction_default_action = "Allow"
+    scm_ip_restriction_default_action = "Allow"
+    minimum_tls_version     = "1.2"
+    scm_minimum_tls_version = "1.2"
   }
 
   app_settings = {
-    "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
+    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
   }
+
+  https_only = false
 }
