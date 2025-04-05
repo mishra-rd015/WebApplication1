@@ -13,11 +13,12 @@ resource "azurerm_service_plan" "this" {
   location            = azurerm_resource_group.this.location
   resource_group_name = azurerm_resource_group.this.name
   os_type             = "Linux"  # Required argument, specify "Linux" or "Windows"
+  
+  sku_name            = "B1"     # Pricing tier (e.g., B1, S1, P1V2)
+  sku_tier            = "Basic"  # SKU tier (Basic, Standard, Premium, etc.)
 
-  sku {
-    tier = "Basic"  # SKU tier, modify according to your needs
-    size = "B1"     # SKU size, modify according to your needs
-  }
+  # Optional: Configure the number of workers (for scaling purposes)
+  # reserved            = true    # If you are using Linux, set this to true
 }
 
 resource "azurerm_linux_web_app" "this" {
@@ -27,11 +28,11 @@ resource "azurerm_linux_web_app" "this" {
   service_plan_id     = azurerm_service_plan.this.id
 
   site_config {
-    always_on = true
+    always_on = true  # Keeps the app always running
   }
 
   app_settings = {
-    "WEBSITE_NODE_DEFAULT_VERSION" = "14.15"
+    "WEBSITE_NODE_DEFAULT_VERSION" = "14.15"  # Node.js version
   }
 
   tags = {
