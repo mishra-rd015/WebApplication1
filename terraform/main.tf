@@ -7,8 +7,8 @@ resource "azurerm_resource_group" "example" {
   location = "East US"
 }
 
-resource "azurerm_app_service_plan" "example" {
-  name                = "example-app-service-plan"
+resource "azurerm_service_plan" "example" {  # Updated resource type
+  name                = "example-service-plan"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
   kind                = "Windows"
@@ -24,7 +24,7 @@ resource "azurerm_windows_web_app" "this" {
   name                = "example-web-app"
   location            = azurerm_resource_group.example.location
   resource_group_name = azurerm_resource_group.example.name
-  app_service_plan_id = azurerm_app_service_plan.example.id
+  service_plan_id     = azurerm_service_plan.example.id  # Corrected argument name
 
   site_config {
     # scm_type is removed because Terraform will auto-decide it
