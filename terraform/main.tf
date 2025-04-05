@@ -1,45 +1,37 @@
 provider "azurerm" {
   features {}
+  subscription_id = "4947feb5-b5f6-4284-acce-df1b262aedb0"
 }
 
-# Define Resource Group
-resource "azurerm_resource_group" "example" {
-  name     = "example-resources"
-  location = "East US"
+resource "azurerm_resource_group" "this" {
+  name     = "rg-jenkins"
+  location = "East US"  # Replace with your desired location or var.location
 }
 
-# Define Service Plan
-resource "azurerm_service_plan" "example" {
-  name                = "example-service-plan"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  kind                = "Windows"        # Use "Windows" for Windows-based apps, "Linux" for Linux-based apps
-  reserved            = false            # Set to false for Windows, true for Linux
+resource "azurerm_service_plan" "this" {
+  name                = "appserviceplan-jenkins"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+  os_type             = "Linux"
 
-  sku {
-    tier = "Standard"
-    size = "S1"
-  }
+  sku_name = "B1"
 }
 
-# Define Windows Web App
-resource "azurerm_windows_web_app" "this" {
-  name                = "example-web-app"
-  location            = azurerm_resource_group.example.location
-  resource_group_name = azurerm_resource_group.example.name
-  service_plan_id     = azurerm_service_plan.example.id  # Correct argument
+resource "azurerm_linux_web_app" "this" {
+  name                = "webapijenkinshardik827813"
+  location            = azurerm_resource_group.this.location
+  resource_group_name = azurerm_resource_group.this.name
+  service_plan_id     = azurerm_service_plan.this.id  # Corrected attribute
 
   site_config {
-    # Auto-decided SCM type by Terraform, but you can configure other site options if needed
+    always_on = true
   }
 
   app_settings = {
-    "WEBSITE_NODE_DEFAULT_VERSION" = "14.15"  # Example app setting, modify as needed
+    "WEBSITE_NODE_DEFAULT_VERSION" = "14.15"
   }
 
   tags = {
-    environment = "production"  # Example tags, modify as needed
+    environment = "production"
   }
 }
-
-# Optional: If you need to deploy a database or other resources, you can add them here.
