@@ -14,14 +14,14 @@ pipeline {
         }
       stage('Terraform Init') {
            steps {
-                dir('WebApplication1'){
+                dir('terraform'){
                 bat '"%TERRAFORM_PATH%" -chdir=terraform init '
               }
           }
     }
       stage('Terraform Plan & Apply') {
            steps {
-               dir('WebApplication1'){
+               dir('terraform'){
                bat '"%TERRAFORM_PATH%" -chdir=terraform plan -out=tfplan'
                bat '"%TERRAFORM_PATH%" -chdir=terraform apply -auto-approve tfplan'
                }
