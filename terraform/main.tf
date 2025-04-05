@@ -1,62 +1,41 @@
-terraform {
-  required_providers {
-    azurerm = {
-      source  = "hashicorp/azurerm"
-      version = "~> 4.0"
-    }
-  }
-
-  backend "azurerm" {
-    resource_group_name  = "rg-jenkins"
-    storage_account_name = "flasktfstorage"
-    container_name       = "tfstate"
-    key                  = "terraform.tfstate"
-  }
-
-  required_version = ">= 1.1.0"
-}
-
 provider "azurerm" {
   features {}
-  subscription_id = "4947feb5-b5f6-4284-acce-df1b262aedb0"
 }
 
-resource "azurerm_resource_group" "this" {
-  name     = "rg-jenkins"
+resource "azurerm_resource_group" "example" {
+  name     = "example-resources"
   location = "East US"
 }
 
-resource "azurerm_service_plan" "this" {
-  name                = "jenkins-app-service-plan"
-  location            = azurerm_resource_group.this.location
-  resource_group_name = azurerm_resource_group.this.name
-  os_type             = "Windows"
-  sku_name            = "B1"
+resource "azurerm_app_service_plan" "example" {
+  name                = "example-app-service-plan"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  kind                = "Windows"
+  reserved            = false
+
+  sku {
+    tier = "Standard"
+    size = "S1"
+  }
 }
 
 resource "azurerm_windows_web_app" "this" {
-  name                = "jenkins-flask-app"
-  location            = azurerm_resource_group.this.location
-  resource_group_name = azurerm_resource_group.this.name
-  service_plan_id     = azurerm_service_plan.this.id
+  name                = "example-web-app"
+  location            = azurerm_resource_group.example.location
+  resource_group_name = azurerm_resource_group.example.name
+  app_service_plan_id = azurerm_app_service_plan.example.id
 
   site_config {
-    always_on               = true
-    managed_pipeline_mode   = "Integrated"
-    scm_type                = "LocalGit"
-    ftps_state              = "Disabled"
-    use_32_bit_worker       = true
-    websockets_enabled      = false
-    http2_enabled           = false
-    ip_restriction_default_action = "Allow"
-    scm_ip_restriction_default_action = "Allow"
-    minimum_tls_version     = "1.2"
-    scm_minimum_tls_version = "1.2"
+    # scm_type is removed because Terraform will auto-decide it
+    # other site_config options, if any, should be configured here
   }
 
   app_settings = {
-    WEBSITES_ENABLE_APP_SERVICE_STORAGE = "false"
+    "WEBSITE_NODE_DEFAULT_VERSION" = "14.15"
   }
 
-  https_only = false
+  tags = {
+    environment = "production"
+  }
 }
