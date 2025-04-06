@@ -4,7 +4,7 @@ provider "azurerm" {
 }
 
 resource "azurerm_resource_group" "this" {
-  name     = "rg-jenkins"
+  name     = "rg-jenkins-new"
   location = var.location
 }
 
